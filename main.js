@@ -1,55 +1,64 @@
-let result = document.querySelector(".result");
+let showContainer = document.querySelector(".result");
 let input = document.querySelector("input");
 let button = document.querySelector("button");
+let listContainer = document.getElementById('suggestions');
 
-button.addEventListener("click", () => {
-  let url = `http://www.omdbapi.com/?t=${input.value}&apikey=${key}`;
-  if (input.value != "") {
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        if (data.Response == "False") {
-          result.innerHTML = `<h1>${input.value} not found</h1>`;
-        } else {
-          result.innerHTML = `
-        <div class="main">
-            <img src="${data.Poster}" alt="" />
-            <div class="info">
-              <div class="name">${data.Title}</div>
-              <div class="rating">
-                <i class="fas fa-star"></i> <span class="rate">${
-                  data.imdbRating
-                }</span>
-              </div>
-              <div class="extra">
-                <span class="">${data.Rated}</span>
-                <span class="year">${data.Year}</span>
-                <span class="duration">${data.Runtime}</span>
-              </div>
-              <div class="genres">
-               <span> ${data.Genre.split(",").join(
-                 "</span><span>"
-               )}</span>               
-              </div>
-            </div>
-          </div>
-          <h3>plot</h3>
-          <p class="plot">
-            ${data.Plot}
-          </p>
-          <h3>cast</h3>
-          <p class="cast">${data.Actors} </p>
-        `;
-        }
-      })
-     
+let apiKey = "e62be596";
+function displayWords(value) {
+  input.value = value;
+  removeElements();
+}
+
+function removeElements() {
+  listContainer.innerHTML = "";
+}
+
+input.addEventListener("keyup", async () => {
+  removeElements();
+  if (input.value.length < 3) {
+    return false;
+  }
+
+  const url = `https://www.omdbapi.com/?s=${input.value}&apikey=${apiKey}`;
+
+  const response = await fetch(url);
+  const jsonData = await response.json();
+
+  jsonData.Search.forEach((result) => {
+    let title = result.Title;
+    let div = document.createElement("div");
+    div.style.cursor = "pointer";
+    div.classList.add("autocomplete-items");
+    div.setAttribute("onclick", "displayWords('" + title + "')");
+    let word = "<b>" + title.substr(0, input.value.length) + "</b>";
+    word += title.substr(input.value.length);
+    div.innerHTML = `<p class="item">${word}</p>`;
+    listContainer.appendChild(div);
+  });
+});
+
+button.addEventListener("click", async () => {
+  if (input.value.trim().length < 1) {
+    alert("Input cannot be blank");
+  }
+  showContainer.innerHTML = "";
+  const url = `https://www.omdbapi.com/?t=${input.value}&apikey=${apiKey}`;
+
+  const response = await fetch(url);
+  const jsonData = await response.json();
+
+  if (jsonData.Response === "True") {
+    showContainer.innerHTML = `<div class="card-container">
+        <div class="container-character-image">
+        <img src="${jsonData.Poster}"/></div>
+        <div class="character-name">${jsonData.Title}</div>
+        <div class="character-description">${jsonData.Plot}</div>
+        </div>`;
   } else {
-    result.innerHTML = `<h1>You know you should enter a name :\\ </h1>`;
+    showContainer.innerHTML = `<p>${input.value} not found</p>`;
   }
 });
 
-let ar = 'mo,jo,po'
-
-ar = ar.split(',').join('</span><span>')
-console.log(ar)
+window.onload = () => {
+  // getRsult(); // You can choose whether to fetch results on page load or not
+};
