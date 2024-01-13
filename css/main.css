@@ -8,6 +8,9 @@ body {
   height: 100vh;
   background: linear-gradient(#000000 50%, #ffb92a 50%);
 }
+i{
+  color:#ffeb3b;
+}
 .container {
   font-size: 16px;
   width: 90vw;
